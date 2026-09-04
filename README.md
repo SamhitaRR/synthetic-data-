@@ -79,7 +79,7 @@ Then copy the provided `nnunetv2` folder into the same location.
 
 ## 9. Install the Pretrained Model
 
-The pretrained model zip file is provided to you.
+The pretrained model zip file is provided to you: [Download model_67_200.zip](https://github.com/SamhitaRR/synthetic-data-/releases/download/model_67_nnunet/model_67_200.zip)
 
 ```bash
 nnUNetv2_install_pretrained_model_from_zip /path/of/model_67_200.zip
