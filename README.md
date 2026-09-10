@@ -1,4 +1,4 @@
-# Synthetic Vacuole Data — Cell Segmentation Pipeline
+# Synthetic Data–Based Cell Segmentation Pipeline
 
 This repo covers four related processes for generating synthetic training data,
 training/running a multi-channel nnU-Net segmentation model, converting its output
