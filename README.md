@@ -25,8 +25,9 @@ The [`shared/`](./shared) folder contains files used by more than one process:
 ## Suggested order
 
 1. Start with **01_synthetic_data_generation** if you need to generate training data
-   and train a model from scratch. Skip straight to **02_nnunet_setup_inference** if
-   you already have a trained model and just want to run inference on new images.
+   and train your own model from scratch. Skip straight to **02_nnunet_setup_inference**
+   if you just want to use the pretrained model provided there to run inference on
+   your own images — no training required.
 2. Run **03_instance_segmentation** on the output of Step 2.
 3. Use **04_napari_ovoid_fitter** independently, at any point, for manual
    segmentation or correcting automated results.
