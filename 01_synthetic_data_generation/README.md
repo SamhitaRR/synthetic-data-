@@ -1,9 +1,8 @@
-# Synthetic Vacuole Data → nnU-Net Training Pipeline
+# Synthetic Data Generation → nnU-Net Training Pipeline
 
 This repo covers two things:
 
-1. Generating synthetic 3D fluorescence microscopy training data (cells with
-   overlaps and dimmer vacuoles), applying PSF blur, and preparing labels.
+1. Generating synthetic 3D fluorescence microscopy training data, applying PSF blur, and preparing labels.
 2. Feeding that data into nnU-Net (v2) and training a multi-channel
    segmentation model on it.
 
