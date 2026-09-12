@@ -88,7 +88,6 @@ nnUNetv2_install_pretrained_model_from_zip /path/of/model_069.zip
 After installation, you should see a `Dataset069_Bigcells` folder inside your `nnUNet_results` directory.
 
 > **Already have a `Dataset069` folder in your results directory?** Rename it to something else before installing the new one to avoid it being overwritten.
-After installation, you should see a `Dataset067_PSFbgVacuoles` folder inside your `nnUNet_results` directory.
 
 
 ## 10. Prepare Images for Inference
