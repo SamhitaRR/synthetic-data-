@@ -100,9 +100,9 @@ After installation, you should see a `Dataset067_PSFbgVacuoles` folder inside yo
 ```json
 {
   "spacing": [
+    0.25,
     0.108,
-    0.108,
-    0.25
+    0.108
   ]
 }
 ```
@@ -114,11 +114,11 @@ Copy this into a text editor and save it as a `.json` file with the appropriate 
 Use the provided `make_spacing_jsons.py` script:
 
 ```bash
-python make_spacing_jsons.py --base-dir /home/Samhita/images/ --spacing 0.108 0.108 0.25
+python make_spacing_jsons.py --base-dir /home/Samhita/images/ --spacing 0.25 0.108 0.108
 ```
 
 - `--base-dir`: path to the folder containing your images
-- `--spacing`: spacing values in **x y z** order
+- `--spacing`: spacing values in **z x y** order
 
 ## 11. Run Inference
 

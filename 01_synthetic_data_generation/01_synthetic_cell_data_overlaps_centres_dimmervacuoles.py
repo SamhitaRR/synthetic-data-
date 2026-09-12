@@ -397,17 +397,16 @@ def generate_synthetic_fluorescence(
 # ---------------------------------------------------------------------------
 
 def run_iteration(params):
-    n_cells, mean_across, filenumber = params
+    n_cells, mean_across, long_radius_mean, filenumber = params
     # different seed per process, matching the R script's per-process seeding
     seed = int(time.time() * 1000) + os.getpid()
     np.random.seed(seed % (2 ** 32 - 1))
-
     return generate_synthetic_fluorescence(
         width=512, height=512,
         n_cells_target=n_cells,
         depth=123,
         target_z=53,
-        long_radius_mean=30,
+        long_radius_mean=long_radius_mean,
         overlap_threshold=0.1,
         MEANacross_16bit=mean_across,
         minthreshold=130,
@@ -422,29 +421,26 @@ def run_iteration(params):
 
 
 def main():
-    n_cells_values = [16, 18, 20, 22, 24, 26, 28, 30 ,32, 34, 36, 38]
+    n_cells_values = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38]
     mean_across_values = list(range(300, 650, 25))
-    long_radius_mean_values = [20, 30, 40]
-    
-    #n_cells_values = [16]
-    #mean_across_values = [400]
+    long_radius_mean_values = [30, 40, 50]
 
     param_grid = [
-        (n_cells, mean_across)
+        (n_cells, mean_across, long_radius_mean)          # now 3 elements
         for n_cells in n_cells_values
         for mean_across in mean_across_values
         for long_radius_mean in long_radius_mean_values
     ]
+
     start_filenumber = 0000
     params = [
-        (n_cells, mean_across, start_filenumber + i)
-        for i, (n_cells, mean_across) in enumerate(param_grid)
+        (n_cells, mean_across, long_radius_mean, start_filenumber + i)
+        for i, (n_cells, mean_across, long_radius_mean) in enumerate(param_grid)
     ]
 
     n_workers = 100
     with ProcessPoolExecutor(max_workers=n_workers) as executor:
         list(executor.map(run_iteration, params))
-
 
 if __name__ == "__main__":
     main()
