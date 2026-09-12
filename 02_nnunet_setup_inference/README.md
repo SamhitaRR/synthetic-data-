@@ -79,15 +79,17 @@ Then copy the provided `nnunetv2` folder into the same location.
 
 ## 9. Install the Pretrained Model
 
-The pretrained model zip file is provided to you: [Download model_67_200.zip](https://github.com/SamhitaRR/synthetic-data-/releases/download/model_67_nnunet/model_67_200.zip)
+The pretrained model zip file is provided to you: [Download model_069.zip](https://github.com/SamhitaRR/synthetic-data-/releases/download/model_069/model_069.zip)
 
 ```bash
-nnUNetv2_install_pretrained_model_from_zip /path/of/model_67_200.zip
+nnUNetv2_install_pretrained_model_from_zip /path/of/model_069.zip
 ```
 
+After installation, you should see a `Dataset069_Bigcells` folder inside your `nnUNet_results` directory.
+
+> **Already have a `Dataset069` folder in your results directory?** Rename it to something else before installing the new one to avoid it being overwritten.
 After installation, you should see a `Dataset067_PSFbgVacuoles` folder inside your `nnUNet_results` directory.
 
-> **Already have a `Dataset067` folder in your results directory?** Rename it to something else before installing the new one to avoid it being overwritten.
 
 ## 10. Prepare Images for Inference
 
@@ -126,7 +128,7 @@ python make_spacing_jsons.py --base-dir /home/Samhita/images/ --spacing 0.25 0.1
 python -m nnunetv2.inference.multi_channel_predictor \
   -i /path/of/input/images/ \
   -o /path/of/output/ \
-  -d 067 \
+  -d 069 \
   -c 3d_fullres \
   -f 0 \
   -tr nnUNetTrainerMultiChannelSeg \
