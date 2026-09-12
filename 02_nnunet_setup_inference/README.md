@@ -140,7 +140,7 @@ python -m nnunetv2.inference.multi_channel_predictor \
 |------|-------------|
 | `-i` | Path to input images |
 | `-o` | Path to output directory |
-| `-d` | Dataset ID (067) |
+| `-d` | Dataset ID (069) |
 | `-c` | Configuration (3d_fullres) |
 | `-f` | Fold number (0) |
 | `-tr` | Trainer class (nnUNetTrainerMultiChannelSeg) |
