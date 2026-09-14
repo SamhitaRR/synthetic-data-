@@ -131,7 +131,7 @@ python -m nnunetv2.inference.multi_channel_predictor \
   -c 3d_fullres \
   -f 0 \
   -tr nnUNetTrainerMultiChannelSeg \
-  -chk checkpoint_epoch_200.pth
+  -chk checkpoint_epoch_1200.pth
 ```
 
 **Flags:**
