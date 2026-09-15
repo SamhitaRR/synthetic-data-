@@ -87,12 +87,13 @@ python watershed_instances.py \
     --cells    path/to/cells.tiff \
     --centres  path/to/centres.tiff \
     --output   path/to/output_instances.tiff \
-    --spacing  0.108 0.108 0.25
+    --spacing  0.25 0.108 0.108
 ```
 
-`--spacing` takes **x y z** values (matching the convention used elsewhere in this
-repo, e.g. `make_spacing_jsons.py`). If omitted, an isotropic distance transform
-is used, same as before.
+`--spacing` takes **z x y** values (matching the convention used elsewhere in this
+repo, e.g. the spacing JSON files described in
+[`02_nnunet_setup_inference`](../02_nnunet_setup_inference/README.md)). If
+omitted, an isotropic distance transform is used, same as before.
 
 **Notes:**
 - Only use one mode's flags at a time — mixing them (e.g. `--cells` with `--input-dir`) will throw an error.

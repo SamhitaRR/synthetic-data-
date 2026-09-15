@@ -73,15 +73,42 @@ def strip_extension(filename: str) -> Tuple[str, str]:
     return root, ext
 
 
-def run_watershed(cells_raw: np.ndarray, centres_raw: np.ndarray) -> np.ndarray:
-    """Core watershed instance segmentation logic. Returns a uint16 instance mask."""
+def fill_holes_slicewise(mask: np.ndarray) -> np.ndarray:
+    """
+    Fill interior holes one z-slice at a time (2D), rather than in full 3D.
+
+    3D hole filling can bridge gaps between adjacent-but-separate slices in ways
+    that don't reflect the actual shape of the cell in each 2D plane. Filling
+    per-slice keeps hole-filling faithful to what's actually enclosed within each
+    slice's own boundary.
+
+    Assumes the array's first axis is Z (the standard shape for a TIFF stack read
+    via tifffile: (Z, Y, X)).
+    """
+    filled = np.zeros_like(mask, dtype=bool)
+    for z in range(mask.shape[0]):
+        filled[z] = binary_fill_holes(mask[z])
+    return filled
+
+
+def run_watershed(cells_raw: np.ndarray, centres_raw: np.ndarray,
+                   spacing_zxy: Tuple[float, float, float] = None) -> np.ndarray:
+    """
+    Core watershed instance segmentation logic. Returns a uint16 instance mask.
+
+    spacing_zxy: optional (z, x, y) voxel spacing. When provided, the distance
+    transform accounts for anisotropic voxel size (e.g. z-spacing coarser than
+    x/y) instead of assuming cubic voxels. Internally converted to (z, y, x) to
+    match the array's axis order.
+    """
     print(f"  Cells shape:   {cells_raw.shape}  dtype: {cells_raw.dtype}  unique: {np.unique(cells_raw)}")
     print(f"  Centres shape: {centres_raw.shape}  dtype: {centres_raw.dtype}  unique: {np.unique(centres_raw)}")
 
     if cells_raw.shape != centres_raw.shape:
         raise ValueError(f"Shape mismatch: cells {cells_raw.shape} vs centres {centres_raw.shape}")
 
-    cell_mask = binary_fill_holes(cells_raw > 0)  # fill small interior holes
+    print("  Filling holes (slice-wise)...")
+    cell_mask = fill_holes_slicewise(cells_raw > 0)
     centre_mask = centres_raw > 0
     print(f"  Cell voxels:   {cell_mask.sum():,}")
     print(f"  Centre voxels: {centre_mask.sum():,}")
@@ -96,9 +123,15 @@ def run_watershed(cells_raw: np.ndarray, centres_raw: np.ndarray) -> np.ndarray:
         print("  No centres found — check the centre mask. Skipping.")
         return None
 
-    # ---- Distance transform ----
-    print("  Computing distance transform...")
-    edt = distance_transform_edt(cell_mask).astype(np.float32)
+    # ---- Distance transform (anisotropic if spacing given) ----
+    if spacing_zxy is not None:
+        z, x, y = spacing_zxy
+        sampling = (z, y, x)  # reorder to match array axis order (Z, Y, X)
+        print(f"  Computing anisotropic distance transform (spacing z={z}, x={x}, y={y})...")
+        edt = distance_transform_edt(cell_mask, sampling=sampling).astype(np.float32)
+    else:
+        print("  Computing distance transform (isotropic — no spacing given)...")
+        edt = distance_transform_edt(cell_mask).astype(np.float32)
     edt_inv = edt.max() - edt  # invert so watershed floods from peaks inward
 
     # ---- Watershed ----
@@ -110,13 +143,14 @@ def run_watershed(cells_raw: np.ndarray, centres_raw: np.ndarray) -> np.ndarray:
     return instances
 
 
-def process_pair(cells_path: str, centres_path: str, output_path: str) -> None:
+def process_pair(cells_path: str, centres_path: str, output_path: str,
+                  spacing_zxy: Tuple[float, float, float] = None) -> None:
     print(f"\nReading cells:   {cells_path}")
     cells_raw = read_tiff(cells_path)
     print(f"Reading centres: {centres_path}")
     centres_raw = read_tiff(centres_path)
 
-    instances = run_watershed(cells_raw, centres_raw)
+    instances = run_watershed(cells_raw, centres_raw, spacing_zxy=spacing_zxy)
     if instances is None:
         return
 
@@ -206,7 +240,14 @@ def main():
     # Shared output folder for modes 2 and 3
     parser.add_argument("--output-dir", help="Folder to write output instance TIFFs to (used with folder modes)")
 
+    # Optional voxel spacing for an anisotropic distance transform
+    parser.add_argument("--spacing", nargs=3, type=float, default=None,
+                         metavar=("Z", "X", "Y"),
+                         help="Voxel spacing in z x y order, e.g. --spacing 0.25 0.108 0.108. "
+                              "If omitted, an isotropic (cubic-voxel) distance transform is used.")
+
     args = parser.parse_args()
+    spacing_zxy = tuple(args.spacing) if args.spacing is not None else None
 
     single_pair_mode = args.cells or args.centres or args.output
     two_dir_mode = args.cells_dir or args.centres_dir
@@ -226,7 +267,7 @@ def main():
     if single_pair_mode:
         if not (args.cells and args.centres and args.output):
             parser.error("Single file mode requires all of: --cells, --centres, --output")
-        process_pair(args.cells, args.centres, args.output)
+        process_pair(args.cells, args.centres, args.output, spacing_zxy=spacing_zxy)
 
     elif two_dir_mode:
         if not (args.cells_dir and args.centres_dir and args.output_dir):
@@ -237,7 +278,7 @@ def main():
             return
         print(f"Found {len(pairs)} matching pair(s).")
         for cells_path, centres_path, out_name in pairs:
-            process_pair(cells_path, centres_path, os.path.join(args.output_dir, out_name))
+            process_pair(cells_path, centres_path, os.path.join(args.output_dir, out_name), spacing_zxy=spacing_zxy)
 
     elif single_dir_mode:
         if not args.output_dir:
@@ -248,7 +289,7 @@ def main():
             return
         print(f"Found {len(pairs)} matching pair(s).")
         for cells_path, centres_path, out_name in pairs:
-            process_pair(cells_path, centres_path, os.path.join(args.output_dir, out_name))
+            process_pair(cells_path, centres_path, os.path.join(args.output_dir, out_name), spacing_zxy=spacing_zxy)
 
 
 if __name__ == "__main__":
