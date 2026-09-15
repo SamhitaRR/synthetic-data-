@@ -80,7 +80,7 @@ Before this data is ready for nnU-Net, the images need PSF convolution
 ## 2. Convolve images with the PSF
 
 Optical blur is applied by convolving the raw synthetic images from Step 1
-with a measured point-spread function, using `convolute_psf.py`. The PSF
+with a theoretical point-spread function, using `convolute_psf.py`. The PSF
 file it uses (`PSF_NA1-4.tif`) is included in this repo.
 
 Edit the paths at the top of the script before running:
