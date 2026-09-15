@@ -69,7 +69,7 @@ Locate where nnU-Net was installed:
 python -c "import nnunetv2, os; print(os.path.dirname(nnunetv2.__file__))"
 ```
 
-Navigate to that location, rename the existing `nnunetv2` folder, and copy in the custom `nnunetv2` folder provided to you:
+Navigate to that location, rename the existing `nnunetv2` folder, and copy in the custom `nnunetv2` folder provided to you (found in this repo under [`shared/nnunetv2`](../shared/nnunetv2)):
 
 ```bash
 mv nnunetv2 nnunetv2_original
@@ -89,7 +89,6 @@ After installation, you should see a `Dataset069_Bigcells` folder inside your `n
 
 > **Already have a `Dataset069` folder in your results directory?** Rename it to something else before installing the new one to avoid it being overwritten.
 
-
 ## 10. Prepare Images for Inference
 
 - Images must be in **TIFF** format with a single input channel.
@@ -108,14 +107,14 @@ After installation, you should see a `Dataset069_Bigcells` folder inside your `n
 }
 ```
 
-Copy this into a text editor and save it as a `.json` file with the appropriate name (matching your image name, minus the `_0000` suffix). Replace the spacing values with your own image's x, y, and z spacing.
+Copy this into a text editor and save it as a `.json` file with the appropriate name (matching your image name, minus the `_0000` suffix). Replace the spacing values with your own image's **z, x, and y** spacing, in that order.
 
 ### Option B: Generate spacing JSONs in bulk
 
-Use the provided `make_spacing_jsons.py` script:
+Use the provided `make_spacing_jsons_single_folder.py` script:
 
 ```bash
-python make_spacing_jsons.py --base-dir /home/Samhita/images/ --spacing 0.25 0.108 0.108
+python make_spacing_jsons_single_folder.py --base-dir /home/Samhita/images/ --spacing 0.25 0.108 0.108
 ```
 
 - `--base-dir`: path to the folder containing your images
@@ -155,20 +154,6 @@ For each input image, inference produces **three output images**:
 | `_seg1` | — | Can be deleted/ignored |
 | `_seg2` | Predicted cell centres | Keep |
 
-`_seg0` (masks) and `_seg2` (centres) can be combined to achieve **instance segmentation**.
-
-## 13. Instance Segmentation
-
-Use the provided `watershed_instances.py` script to combine the `_seg0` and `_seg2` outputs into a single instance segmentation mask, where each cell is assigned a unique integer label.
-
-```bash
-python watershed_instances.py \
-  --input-dir  /path/of/nnunet/output/ \
-  --output-dir /path/of/instance/output/
-```
-
-**Flags:**
-| Flag | Description |
-|------|-------------|
-| `--input-dir` | Folder where the nnU-Net outputs are saved |
-| `--output-dir` | Folder to save the instance segmentation masks to |
+`_seg0` (masks) and `_seg2` (centres) can be combined to achieve **instance
+segmentation** — see [`03_instance_segmentation`](../03_instance_segmentation/README.md)
+for how to do that with the provided `watershed_instances.py` script.
