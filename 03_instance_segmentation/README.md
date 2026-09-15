@@ -25,6 +25,13 @@ segmentation**, using a distance-transform + seeded watershed approach: each
 labelled centre acts as a seed, and the watershed floods outward through the
 cell mask until it hits another cell's territory or the mask boundary.
 
+Before the distance transform, interior holes in the cell mask are filled
+**slice-by-slice** (2D, per z-slice) rather than in full 3D — this avoids
+accidentally bridging gaps that only exist in one slice. The distance transform
+itself can optionally account for **anisotropic voxel spacing** (see `--spacing`
+below), which matters when z-spacing differs from x/y spacing, as is typical for
+3D microscopy stacks.
+
 ## Usage
 
 `watershed_instances.py` supports three input modes:
@@ -69,8 +76,27 @@ python watershed_instances.py \
     --centres-suffix _seg2
 ```
 
+### Optional: anisotropic voxel spacing
+
+By default, the distance transform assumes cubic (isotropic) voxels. If your
+z-spacing differs from your x/y spacing, pass `--spacing` to get a more accurate
+result — this affects all three modes above:
+
+```bash
+python watershed_instances.py \
+    --cells    path/to/cells.tiff \
+    --centres  path/to/centres.tiff \
+    --output   path/to/output_instances.tiff \
+    --spacing  0.108 0.108 0.25
+```
+
+`--spacing` takes **x y z** values (matching the convention used elsewhere in this
+repo, e.g. `make_spacing_jsons.py`). If omitted, an isotropic distance transform
+is used, same as before.
+
 **Notes:**
 - Only use one mode's flags at a time — mixing them (e.g. `--cells` with `--input-dir`) will throw an error.
 - Any files without a matching pair are skipped, with a warning printed to the console.
 - Outputs are named `<basename>_instances.tiff`, saved as 16-bit TIFFs.
 - Accepts both `.tif` and `.tiff` extensions.
+- Hole filling is always done slice-wise (2D), regardless of whether `--spacing` is used.
